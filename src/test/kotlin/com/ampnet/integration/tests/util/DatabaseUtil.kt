@@ -8,12 +8,14 @@ import kotliquery.using
 
 object DatabaseUtil {
 
+    private const val databaseUrl = "jdbc:postgresql://localhost:5432"
+
     // TODO: maybe extract to env values
     private val backendDatabase: HikariDataSource by lazy {
-        HikariCP.default("jdbc:postgresql://localhost:5432/crowdfunding", "crowdfunding", "password")
+        HikariCP.default("$databaseUrl/crowdfunding", "crowdfunding", "password")
     }
     private val blockchainDatabase: HikariDataSource by lazy {
-        HikariCP.default("jdbc:postgresql://localhost:5432/blockchain", "blockchain", "password")
+        HikariCP.default("$databaseUrl/blockchain", "blockchain", "password")
     }
 
     const val defaultUserPassword = "abcdefgh"

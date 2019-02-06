@@ -6,12 +6,17 @@ import com.ampnet.integration.tests.util.BlockchainUtil
 import com.ampnet.integration.tests.util.DatabaseUtil
 import com.ampnet.integration.tests.backend.WalletCreateRequest
 import com.ampnet.integration.tests.backend.WalletResponse
+import org.junit.AfterClass
+import org.junit.BeforeClass
 import org.web3j.crypto.Credentials
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.fail
+import java.io.File
+import org.testcontainers.containers.DockerComposeContainer
+import org.testcontainers.containers.wait.strategy.Wait
 
 class WalletTest: BaseTest() {
 
@@ -146,5 +151,29 @@ class WalletTest: BaseTest() {
         var userId = -1
         var organizationId = -1
         var projectId = -1
+    }
+
+    companion object {
+
+        private val instance: KDockerComposeContainer by lazy { defineDockerCompose()}
+
+        class KDockerComposeContainer(file: File) : DockerComposeContainer<KDockerComposeContainer>(file)
+
+        private fun defineDockerCompose() = KDockerComposeContainer(File("src/test/resources/compose-test.yml"))
+                .waitingFor("blockchain-service", Wait.forHttp("/actuator/health").forStatusCode(200))
+                .waitingFor("backend-service", Wait.forHttp("/actuator/health").forStatusCode(200))
+                .withLocalCompose(true)
+
+        @BeforeClass
+        @JvmStatic
+        internal fun beforeAll() {
+            instance.start()
+        }
+
+        @AfterClass
+        @JvmStatic
+        internal fun afterAll() {
+            instance.stop()
+        }
     }
 }

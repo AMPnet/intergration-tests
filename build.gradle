@@ -36,10 +36,9 @@ dependencies {
 
     // Use the Kotlin test library.
     testImplementation 'org.jetbrains.kotlin:kotlin-test'
-
     // Use the Kotlin JUnit integration.
     testImplementation 'org.jetbrains.kotlin:kotlin-test-junit'
-
+    testImplementation "org.testcontainers:testcontainers:1.10.6"
 }
 
 // Define the main class for the application.
