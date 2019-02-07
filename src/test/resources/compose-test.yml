@@ -19,7 +19,9 @@ services:
        - 8123
 
   blockchain-service:
-    image: blockchain-service
+    image: blockchain:0.0.1-SNAPSHOT
+    environment:
+      - "spring.profiles.active=dev"
     depends_on:
       - db
       - ganache-ampnet-contracts
