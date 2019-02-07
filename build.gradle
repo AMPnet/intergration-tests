@@ -9,6 +9,7 @@ ext {
 
 repositories {
     jcenter()
+    maven { url 'https://jitpack.io' }
 }
 
 dependencies {
@@ -26,6 +27,7 @@ dependencies {
     implementation 'com.zaxxer:HikariCP:3.2.0'
     implementation 'org.postgresql:postgresql:42.2.5'
     implementation 'ch.qos.logback:logback-classic:1.2.3'
+    implementation 'com.github.ipfs:java-ipfs-http-client:v1.2.3'
 
     testImplementation 'org.jetbrains.kotlin:kotlin-test'
     testImplementation 'org.jetbrains.kotlin:kotlin-test-junit'

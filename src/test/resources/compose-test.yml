@@ -13,6 +13,7 @@ services:
       - "spring.profiles.active=dev"
     depends_on:
        - db
+       - ipfs
     ports:
        - 8123:8123
     expose:
@@ -34,3 +35,10 @@ services:
       - 8545:8545
     expose:
       - 8545
+
+  ipfs:
+    image: ipfs/go-ipfs:latest
+    ports:
+      - 4001:4001
+      - 8080:8080
+      - 5001:5001

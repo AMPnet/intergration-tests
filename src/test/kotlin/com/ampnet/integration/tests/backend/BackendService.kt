@@ -7,9 +7,11 @@ import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import com.github.kittinunf.fuel.Fuel
+import com.github.kittinunf.fuel.core.FileDataPart
 import com.github.kittinunf.fuel.core.extensions.authentication
 import com.github.kittinunf.fuel.core.extensions.jsonBody
 import com.github.kittinunf.fuel.jackson.responseObject
+import java.io.File
 
 object BackendService {
 
@@ -105,6 +107,15 @@ object BackendService {
                 .authentication()
                 .bearer(token)
                 .responseObject<OrganizationWithDocumentResponse>(mapper)
+        return response.third.get()
+    }
+
+    fun addDocument(token: String, organizationId: Int, fileLocation: String, fileName: String): DocumentResponse {
+        val response = Fuel.upload("$backendUrl/organization/$organizationId/document")
+                .add(FileDataPart(File(fileLocation), name = "file", filename=fileName))
+                .authentication()
+                .bearer(token)
+                .responseObject<DocumentResponse>(mapper)
         return response.third.get()
     }
 

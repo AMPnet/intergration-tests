@@ -37,9 +37,6 @@ class WalletTest: BaseTest() {
             DatabaseUtil.cleanBlockchainDb()
             DatabaseUtil.cleanBackendDb()
         }
-        suppose("Backend service is UP and running") {
-            waitForBackendServiceToStartUp()
-        }
 
         verify("User can create wallet") {
             createUserWallet()
@@ -134,46 +131,10 @@ class WalletTest: BaseTest() {
         return BackendService.createUserWallet(token, walletCreateRequest)
     }
 
-    private fun waitForBackendServiceToStartUp() {
-        for (i in 0..5) {
-            val healthStatus = BackendService.getHealthStatus()
-            if (healthStatus?.status == "UP") {
-                return
-            }
-            println("Waiting for Backend service to start up")
-            Thread.sleep(2000)
-        }
-        fail("Backend service did not manage to stat up")
-    }
-
     private class TestContext {
         lateinit var token: String
         var userId = -1
         var organizationId = -1
         var projectId = -1
-    }
-
-    companion object {
-
-        private val instance: KDockerComposeContainer by lazy { defineDockerCompose()}
-
-        class KDockerComposeContainer(file: File) : DockerComposeContainer<KDockerComposeContainer>(file)
-
-        private fun defineDockerCompose() = KDockerComposeContainer(File("src/test/resources/compose-test.yml"))
-                .waitingFor("blockchain-service", Wait.forHttp("/actuator/health").forStatusCode(200))
-                .waitingFor("backend-service", Wait.forHttp("/actuator/health").forStatusCode(200))
-                .withLocalCompose(true)
-
-        @BeforeClass
-        @JvmStatic
-        internal fun beforeAll() {
-            instance.start()
-        }
-
-        @AfterClass
-        @JvmStatic
-        internal fun afterAll() {
-            instance.stop()
-        }
     }
 }
