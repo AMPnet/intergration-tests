@@ -25,6 +25,9 @@ class IpfsTest: BaseTest() {
 
     @Test
     fun mustBeAbleToAddAndGetOrganizationDocument() {
+        suppose("Database is clean") {
+            DatabaseUtil.cleanBackendDb()
+        }
         suppose("User exists in database") {
             DatabaseUtil.insertUserInDb(testContext.email)
             testContext.userId = DatabaseUtil.getUserIdForEmail(testContext.email)

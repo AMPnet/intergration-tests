@@ -1,7 +1,5 @@
 package com.ampnet.integration.tests
 
-import org.junit.AfterClass
-import org.junit.BeforeClass
 import org.testcontainers.containers.DockerComposeContainer
 import org.testcontainers.containers.wait.strategy.Wait
 import java.io.File
@@ -25,16 +23,8 @@ abstract class BaseTest {
                 .waitingFor("blockchain-service", Wait.forHttp("/actuator/health").forStatusCode(200))
                 .withLocalCompose(true)
 
-        @BeforeClass
-        @JvmStatic
-        internal fun beforeAll() {
+        init {
             instance.start()
-        }
-
-        @AfterClass
-        @JvmStatic
-        internal fun afterAll() {
-            instance.stop()
         }
     }
 }
