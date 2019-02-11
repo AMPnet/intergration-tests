@@ -3,6 +3,10 @@ version: 2
 jobs:
   test:
     machine: true
+    environment:
+      TERM: dumb
+    working_directory: ~/repo
+    
     steps:
       - checkout
 
@@ -12,7 +16,7 @@ jobs:
             # fallback to using the latest cache if no exact match is found
             - v1-dependencies-
 
-      - run: export TERM=xterm && gradle dependencies
+      - run: gradle dependencies
 
       - save_cache:
           paths:
@@ -25,6 +29,8 @@ jobs:
 
   deploy:
     machine: true
+    environment:
+      TERM: dumb
     steps:
       - add_ssh_keys:
           fingerprints:
