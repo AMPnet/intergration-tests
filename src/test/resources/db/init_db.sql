@@ -1,0 +1,11 @@
+DROP DATABASE IF EXISTS crowdfunding;
+CREATE DATABASE crowdfunding ENCODING 'UTF-8';
+
+DROP USER IF EXISTS crowdfunding;
+CREATE USER crowdfunding WITH PASSWORD 'password';
+
+DROP DATABASE IF EXISTS blockchain;
+CREATE DATABASE blockchain ENCODING 'UTF-8';
+
+DROP USER IF EXISTS blockchain;
+CREATE USER blockchain WITH PASSWORD 'password';
