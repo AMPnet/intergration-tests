@@ -2,9 +2,7 @@ version: 2
 
 jobs:
   test:
-    machine:
-      java:
-        version: 'oraclejdk8'
+    machine: true
     environment:
       TERM: dumb
       CIRCLE_ARTIFACTS: /tmp/circleci-artifacts
@@ -20,7 +18,10 @@ jobs:
 #            - v1-dep-{{ .Branch }}-
 #            - v1-dep-master-
 #            - v1-dep-
-      - run: gradle --stacktrace dependencies
+      - run:
+          name: chmod permissions
+          command: sudo chmod +x ./gradlew
+      - run: ./gradlew --stacktrace dependencies
 #      - save_cache:
 #          key: v1-dep-{{ .Branch }}-{{ epoch }}
 #          paths:
@@ -43,9 +44,7 @@ jobs:
           path: /tmp/circleci-test-results
 
   deploy:
-    machine:
-      java:
-        version: 'oraclejdk8'
+    machine: true
     environment:
       TERM: dumb
     steps:
