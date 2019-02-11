@@ -1,9 +1,7 @@
 version: 2
-
+executorType: machine
 jobs:
   test:
-    docker:
-      - image: circleci/openjdk:8-jdk
     environment:
       TERM: dumb
       CIRCLE_ARTIFACTS: /tmp/circleci-artifacts
@@ -42,7 +40,6 @@ jobs:
           path: /tmp/circleci-test-results
 
   deploy:
-    machine: true
     environment:
       TERM: dumb
     steps:
