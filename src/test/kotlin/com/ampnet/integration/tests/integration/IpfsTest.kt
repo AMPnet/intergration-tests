@@ -18,12 +18,12 @@ class IpfsTest: BaseTest() {
 
     private lateinit var testContext: TestContext
 
-    @BeforeTest
+//    @BeforeTest
     fun init() {
         testContext = TestContext()
     }
 
-    @Test
+//    @Test
     fun mustBeAbleToAddAndGetOrganizationDocument() {
         suppose("Database is clean") {
             DatabaseUtil.cleanBackendDb()
