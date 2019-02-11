@@ -1,6 +1,8 @@
 version: '2'
 services:
   db:
+    build:
+      context: ./db
     image: crowd-db
     ports:
       - 5432:5432
