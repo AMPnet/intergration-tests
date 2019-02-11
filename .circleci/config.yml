@@ -13,25 +13,15 @@ jobs:
       - checkout
       - run: mkdir -p $CIRCLE_ARTIFACTS $CIRCLE_TEST_REPORTS
 
-      # Dependencies
-      #   This would typically go in either a build or a build-and-test job when using workflows
-      # Restore the dependency cache
       - restore_cache:
           keys:
-            # This branch if available
             - v1-dep-{{ .Branch }}-
-            # Default branch if not
             - v1-dep-master-
-            # Any branch if there are none on the default branch - this should be unnecessary if you have your default branch configured correctly
             - v1-dep-
-      # The following line was run implicitly in your 1.0 builds based on what CircleCI inferred about the structure of your project. In 2.0 you need to be explicit about which commands should be run. In some cases you can discard inferred commands if they are not relevant to your project.
-      - run: if [ -a ./gradlew ]; then gradlew dependencies --stacktrace; else gradle dependencies --stacktrace; fi
-      # Save dependency cache
+      - run: gradle dependencies
       - save_cache:
           key: v1-dep-{{ .Branch }}-{{ epoch }}
           paths:
-            # This is a broad list of cache paths to include many possible development environments
-            # You can probably delete some of these entries
             - vendor/bundle
             - ~/virtualenvs
             - ~/.m2
@@ -45,7 +35,6 @@ jobs:
 
       - store_test_results:
           path: /tmp/circleci-test-results
-      # Save artifacts
       - store_artifacts:
           path: /tmp/circleci-artifacts
       - store_artifacts:
