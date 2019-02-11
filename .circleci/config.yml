@@ -11,30 +11,30 @@ jobs:
 
     steps:
       - checkout
-#      - run: mkdir -p $CIRCLE_ARTIFACTS $CIRCLE_TEST_REPORTS
+      - run: mkdir -p $CIRCLE_ARTIFACTS $CIRCLE_TEST_REPORTS
 
-#      - restore_cache:
-#          keys:
-#            - v1-dep-{{ .Branch }}-
-#            - v1-dep-master-
-#            - v1-dep-
+      - restore_cache:
+          keys:
+            - v1-dep-{{ .Branch }}-
+            - v1-dep-master-
+            - v1-dep-
       - run:
           name: chmod permissions
           command: sudo chmod +x ./gradlew
       - run: ./gradlew --stacktrace dependencies
-#      - save_cache:
-#          key: v1-dep-{{ .Branch }}-{{ epoch }}
-#          paths:
-#            - vendor/bundle
-#            - ~/virtualenvs
-#            - ~/.m2
-#            - ~/.ivy2
-#            - ~/.bundle
-#            - ~/.go_workspace
-#            - ~/.gradle
-#            - ~/.cache/bower
+      - save_cache:
+          key: v1-dep-{{ .Branch }}-{{ epoch }}
+          paths:
+            - vendor/bundle
+            - ~/virtualenvs
+            - ~/.m2
+            - ~/.ivy2
+            - ~/.bundle
+            - ~/.go_workspace
+            - ~/.gradle
+            - ~/.cache/bower
 
-      - run: gradle test
+      - run: ./gradlew test
 
       - store_test_results:
           path: /tmp/circleci-test-results
