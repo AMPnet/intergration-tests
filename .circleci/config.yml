@@ -11,25 +11,25 @@ jobs:
 
     steps:
       - checkout
-      - run: mkdir -p $CIRCLE_ARTIFACTS $CIRCLE_TEST_REPORTS
+#      - run: mkdir -p $CIRCLE_ARTIFACTS $CIRCLE_TEST_REPORTS
 
-      - restore_cache:
-          keys:
-            - v1-dep-{{ .Branch }}-
-            - v1-dep-master-
-            - v1-dep-
-      - run: gradle dependencies
-      - save_cache:
-          key: v1-dep-{{ .Branch }}-{{ epoch }}
-          paths:
-            - vendor/bundle
-            - ~/virtualenvs
-            - ~/.m2
-            - ~/.ivy2
-            - ~/.bundle
-            - ~/.go_workspace
-            - ~/.gradle
-            - ~/.cache/bower
+#      - restore_cache:
+#          keys:
+#            - v1-dep-{{ .Branch }}-
+#            - v1-dep-master-
+#            - v1-dep-
+      - run: gradle --stacktrace dependencies
+#      - save_cache:
+#          key: v1-dep-{{ .Branch }}-{{ epoch }}
+#          paths:
+#            - vendor/bundle
+#            - ~/virtualenvs
+#            - ~/.m2
+#            - ~/.ivy2
+#            - ~/.bundle
+#            - ~/.go_workspace
+#            - ~/.gradle
+#            - ~/.cache/bower
 
       - run: gradle test
 
