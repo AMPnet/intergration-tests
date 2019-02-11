@@ -13,6 +13,12 @@ buildscript {
 }
 
 apply plugin: 'kotlin'
+apply plugin : 'java'
+
+test {
+    testLogging.showStandardStreams = true
+    testLogging.exceptionFormat = 'full'
+}
 
 sourceCompatibility = 1.8
 compileKotlin {
