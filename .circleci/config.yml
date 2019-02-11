@@ -2,11 +2,8 @@ version: 2
 executorType: machine
 jobs:
   test:
-    machine:
-      docker_layer_caching: true
+    machine: true
     environment:
-      _JAVA_OPTIONS: "-Xmx2048m"
-      GRADLE_OPTS: '-Dorg.gradle.console=plain -Dorg.gradle.parallel=true'
       TERM: dumb
       CIRCLE_ARTIFACTS: /tmp/circleci-artifacts
       CIRCLE_TEST_REPORTS: /tmp/circleci-test-results
