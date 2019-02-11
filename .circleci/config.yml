@@ -13,6 +13,8 @@ jobs:
       - checkout
       - run: mkdir -p $CIRCLE_ARTIFACTS $CIRCLE_TEST_REPORTS
 
+      - run: docker-compose --version
+
       - restore_cache:
           keys:
             - v1-dep-{{ .Branch }}-
