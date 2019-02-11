@@ -1,7 +1,10 @@
 version: 2
-executorType: machine
+
 jobs:
   test:
+    machine:
+      java:
+        version: 'oraclejdk8'
     environment:
       TERM: dumb
       CIRCLE_ARTIFACTS: /tmp/circleci-artifacts
@@ -40,6 +43,9 @@ jobs:
           path: /tmp/circleci-test-results
 
   deploy:
+    machine:
+      java:
+        version: 'oraclejdk8'
     environment:
       TERM: dumb
     steps:
