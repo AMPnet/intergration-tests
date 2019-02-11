@@ -16,9 +16,8 @@ jobs:
             - v1-dep-{{ .Branch }}-
             - v1-dep-master-
             - v1-dep-
-      - run:
-          name: chmod permissions
-          command: sudo chmod +x ./gradlew
+
+      - run: sudo chmod +x ./gradlew
       - run: ./gradlew dependencies
 
       - save_cache:
@@ -45,10 +44,10 @@ jobs:
             - "96:2c:54:e3:52:7c:c8:89:e3:0f:58:44:d8:be:71:fb"
       - run:
           name: Update docker-compose
-          command: ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -t root@ampnet.io "docker-compose pull -f /home/eugen/ampnet-docker-compose/docker-compose.yml"
+          command: ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -t root@ampnet.io "docker-compose -f /home/eugen/ampnet-docker-compose/docker-compose.yml pull"
       - run:
           name: Run docker-compose
-          command: ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -t root@ampnet.io "docker-compose up -f /home/eugen/ampnet-docker-compose/docker-compose.yml"
+          command: ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -t root@ampnet.io "docker-compose -f /home/eugen/ampnet-docker-compose/docker-compose.yml up -d"
 
 workflows:
   version: 2
