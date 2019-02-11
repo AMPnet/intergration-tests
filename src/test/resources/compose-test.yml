@@ -6,7 +6,7 @@ services:
       - 5432:5432
 
   backend-service:
-    image: crowdfunding-backend:0.0.1-SNAPSHOT
+    image: ampnet/crowdfunding-backend:0.0.1
     environment:
       - "spring.profiles.active=dev"
     depends_on:
@@ -16,7 +16,7 @@ services:
        - 8123:8123
 
   blockchain-service:
-    image: blockchain:0.0.1-SNAPSHOT
+    image: ampnet/crowdfunding-blockchain:0.0.1-SNAPSHOT
     environment:
       - "spring.profiles.active=dev"
     depends_on:
@@ -26,7 +26,7 @@ services:
       - 8124:8124
 
   ganache-ampnet-contracts:
-    image: ampnet-contracts
+    image: ampnet/crowdfunding-contracts:0.1
     ports:
       - 8545:8545
 
