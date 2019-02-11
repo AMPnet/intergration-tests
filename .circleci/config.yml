@@ -29,11 +29,9 @@ jobs:
       - add_ssh_keys:
           fingerprints:
             - "96:2c:54:e3:52:7c:c8:89:e3:0f:58:44:d8:be:71:fb"
-
       - run:
           name: Update docker-compose
           command: ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -t root@ampnet.io "docker-compose pull -f /home/eugen/ampnet-docker-compose/docker-compose.yml"
-
       - run:
           name: Run docker-compose
           command: ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -t root@ampnet.io "docker-compose up -f /home/eugen/ampnet-docker-compose/docker-compose.yml"
