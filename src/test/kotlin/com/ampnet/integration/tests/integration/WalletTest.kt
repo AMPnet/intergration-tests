@@ -6,30 +6,15 @@ import com.ampnet.integration.tests.util.BlockchainUtil
 import com.ampnet.integration.tests.util.DatabaseUtil
 import com.ampnet.integration.tests.backend.WalletCreateRequest
 import com.ampnet.integration.tests.backend.WalletResponse
-import org.junit.AfterClass
-import org.junit.BeforeClass
 import org.web3j.crypto.Credentials
-import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.fail
-import java.io.File
-import org.testcontainers.containers.DockerComposeContainer
-import org.testcontainers.containers.wait.strategy.Wait
 
 class WalletTest: BaseTest() {
 
-    private val email = "test@email.com"
-    private val organizationName = "Organization"
-    private val projectName = "Project"
-
-    private lateinit var testContext: TestContext
-
-    @BeforeTest
-    fun init() {
-        testContext = TestContext()
-    }
+    private val alice = TestUser("alice@email.com", BlockchainUtil.alice)
 
     @Test
     fun createProject() {
@@ -38,88 +23,95 @@ class WalletTest: BaseTest() {
             DatabaseUtil.cleanBackendDb()
         }
 
-        verify("User can create wallet") {
-            createUserWallet()
+        verify("User Alice can create wallet") {
+            createUserWithWallet(alice)
         }
         verify("Organization can create wallet") {
-            createOrganizationWallet()
+            createOrganizationWithWallet(alice, "Alice organization")
         }
 
-        verify("User can approve organization") {
-            val organizationResponse = BackendService.approveOrganization(testContext.token, testContext.organizationId)
+        verify("User Alice can approve organization") {
+            val organizationResponse = BackendService.approveOrganization(alice.token, alice.organizationId)
             assertNotNull(organizationResponse)
         }
 
+        verify("User Alice can create project wallet") {
+            createProjectWithWallet(alice, "Alice project")
+        }
+        verify("User Alice can get balance for project wallet") {
+            val projectWalletWithBalance = BackendService.getProjectWallet(alice.token, alice.projectId)
+            assertNotNull(projectWalletWithBalance)
+        }
+    }
+
+    private fun createUserWithWallet(user: TestUser) {
+        suppose("User exists in database") {
+            DatabaseUtil.insertUserInDb(user.email)
+            user.userId = DatabaseUtil.getUserIdForEmail(user.email)
+                    ?: fail("Missing user with email: ${user.email}")
+        }
+
+        verify("User can get token") {
+            user.token = BackendService.getJwtToken(user.email, DatabaseUtil.defaultUserPassword)
+        }
+        verify("User does not have a wallet") {
+            val emptyWallet = BackendService.getUserWallet(user.token)
+            assertNull(emptyWallet)
+        }
+        verify("User can create a wallet") {
+            val wallet = createUserWallet(user.token, user.credentials)
+            assertNotNull(wallet)
+        }
+        verify("User can get wallet balance") {
+            val walletWithBalance = BackendService.getUserWallet(user.token)
+            assertNotNull(walletWithBalance)
+        }
+    }
+
+    private fun createOrganizationWithWallet(user: TestUser, organizationName: String) {
+        suppose("User has wallet") {
+            val walletWithBalance = BackendService.getUserWallet(user.token)
+            assertNotNull(walletWithBalance)
+        }
+        suppose("Organization exists") {
+            DatabaseUtil.insertOrganizationInDb(organizationName, user.userId)
+            user.organizationId = DatabaseUtil.getOrganizationIdForName(organizationName)
+                    ?: fail("Missing organization with name: $organizationName")
+        }
+
+        suppose("User is an admin of the organization") {
+            DatabaseUtil.insertOrganizationMembershipInDb(user.userId, user.organizationId)
+        }
+
+        verify("User can create organization wallet") {
+            val transactionToCreateOrganization = BackendService
+                    .getTransactionToCreateOrganizationWallet(user.token, user.organizationId)
+            val signedTransaction = BlockchainUtil
+                    .signTransaction(transactionToCreateOrganization.transactionData, user.credentials)
+            BackendService.createOrganizationWallet(user.token, user.organizationId, signedTransaction)
+        }
+        verify("User can get balance for organization wallet") {
+            Thread.sleep(3000)
+            val walletWithBalance = BackendService.getOrganizationWallet(user.token, user.organizationId)
+            assertNotNull(walletWithBalance)
+        }
+    }
+
+    private fun createProjectWithWallet(user: TestUser, projectName: String) {
         suppose("Project exists") {
-            DatabaseUtil.insertProjectInDb(projectName, testContext.userId, testContext.organizationId)
-            testContext.projectId = DatabaseUtil.getProjectIdForName(projectName)
+            DatabaseUtil.insertProjectInDb(projectName, user.userId, user.organizationId)
+            user.projectId = DatabaseUtil.getProjectIdForName(projectName)
                     ?: fail("Missing project with name: $projectName")
         }
 
         verify("User can create project wallet") {
             val transactionToCreateProject = BackendService
-                    .getTransactionToCreateProjectWallet(testContext.token, testContext.projectId)
+                    .getTransactionToCreateProjectWallet(user.token, user.projectId)
             val signedTransactionToCreateProject = BlockchainUtil
-                    .signTransaction(transactionToCreateProject.transactionData, BlockchainUtil.alice)
+                    .signTransaction(transactionToCreateProject.transactionData, user.credentials)
             val projectWallet = BackendService
-                    .createProjectWallet(testContext.token, testContext.projectId, signedTransactionToCreateProject)
+                    .createProjectWallet(user.token, user.projectId, signedTransactionToCreateProject)
             assertNotNull(projectWallet)
-        }
-        verify("User can get balance for project wallet") {
-            val projectWalletWithBalance = BackendService.getProjectWallet(testContext.token, testContext.projectId)
-            assertNotNull(projectWalletWithBalance)
-        }
-    }
-
-    private fun createUserWallet() {
-        suppose("User exists in database") {
-            DatabaseUtil.insertUserInDb(email)
-            testContext.userId = DatabaseUtil.getUserIdForEmail(email) ?: fail("Missing user with email: $email")
-        }
-
-        verify("User can get token") {
-            testContext.token = BackendService.getJwtToken(email, DatabaseUtil.defaultUserPassword)
-        }
-        verify("User does not have a wallet") {
-            val emptyWallet = BackendService.getUserWallet(testContext.token)
-            assertNull(emptyWallet)
-        }
-        verify("User can create a wallet") {
-            val wallet = createUserWallet(testContext.token, BlockchainUtil.alice)
-            assertNotNull(wallet)
-        }
-        verify("User can get wallet balance") {
-            val walletWithBalance = BackendService.getUserWallet(testContext.token)
-            assertNotNull(walletWithBalance)
-        }
-    }
-
-    private fun createOrganizationWallet() {
-        suppose("User has wallet") {
-            val walletWithBalance = BackendService.getUserWallet(testContext.token)
-            assertNotNull(walletWithBalance)
-        }
-        suppose("Organization exists") {
-            DatabaseUtil.insertOrganizationInDb(organizationName, testContext.userId)
-            testContext.organizationId = DatabaseUtil.getOrganizationIdForName(organizationName)
-                    ?: fail("Missing organization with name: $organizationName")
-        }
-
-        suppose("User is an admin of the organization") {
-            DatabaseUtil.insertOrganizationMembershipInDb(testContext.userId, testContext.organizationId)
-        }
-
-        verify("User can create organization wallet") {
-            val transactionToCreateOrganization = BackendService
-                    .getTransactionToCreateOrganizationWallet(testContext.token, testContext.organizationId)
-            val signedTransaction = BlockchainUtil
-                    .signTransaction(transactionToCreateOrganization.transactionData, BlockchainUtil.alice)
-            BackendService.createOrganizationWallet(testContext.token, testContext.organizationId, signedTransaction)
-        }
-        verify("User can get balance for organization wallet") {
-            Thread.sleep(3000)
-            val walletWithBalance = BackendService.getOrganizationWallet(testContext.token, testContext.organizationId)
-            assertNotNull(walletWithBalance)
         }
     }
 
@@ -131,7 +123,7 @@ class WalletTest: BaseTest() {
         return BackendService.createUserWallet(token, walletCreateRequest)
     }
 
-    private class TestContext {
+    private class TestUser(val email: String, val credentials: Credentials) {
         lateinit var token: String
         var userId = -1
         var organizationId = -1
