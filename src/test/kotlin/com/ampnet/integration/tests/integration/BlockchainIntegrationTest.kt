@@ -13,7 +13,7 @@ import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.fail
 
-class WalletTest: BaseTest() {
+class BlockchainIntegrationTest: BaseTest() {
 
     private val alice = TestUser("alice@email.com", BlockchainUtil.alice)
     private val bob = TestUser("bob@email.com", BlockchainUtil.bob)
@@ -145,10 +145,7 @@ class WalletTest: BaseTest() {
     }
 
     private fun createUserWallet(token: String, credentials: Credentials): WalletResponse {
-        val walletToken = BackendService.getWalletToken(token)
-        val walletCreateRequest = WalletCreateRequest(
-                credentials.address, BlockchainUtil.getPublicKey(credentials), walletToken.token
-        )
+        val walletCreateRequest = WalletCreateRequest(credentials.address, BlockchainUtil.getPublicKey(credentials))
         return BackendService.createUserWallet(token, walletCreateRequest)
     }
 
