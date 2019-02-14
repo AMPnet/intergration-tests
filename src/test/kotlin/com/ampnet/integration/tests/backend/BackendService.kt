@@ -145,4 +145,37 @@ object BackendService {
                 .responseObject<WalletResponse>(mapper)
         return response.third.get()
     }
+
+    fun getProjectInvestTransaction(token: String, projectId: Int, amount: Long): TransactionResponse {
+        val params = listOf("amount" to amount)
+        val response = Fuel.get("$backendUrl/project/$projectId/invest", params)
+                .authentication()
+                .bearer(token)
+                .responseObject<TransactionResponse>(mapper)
+        return response.third.get()
+    }
+
+    fun investInProject(signedTransaction: String): TxHashResponse {
+        val request = SignedTransaction(signedTransaction)
+        val response = Fuel.post("$backendUrl/project/invest")
+                .jsonBody(mapper.writeValueAsString(request))
+                .responseObject<TxHashResponse>(mapper)
+        return response.third.get()
+    }
+
+    /* Issuing Authority */
+    fun generateMintTransaction(from: String, userEmail: String, amount: Long): TransactionResponse {
+        val params = listOf("from" to from, "email" to userEmail, "amount" to amount)
+        val response = Fuel.get("$backendUrl/issuer/mint", params)
+                .responseObject<TransactionResponse>(mapper)
+        return response.third.get()
+    }
+
+    fun postAuthorityTransaction(signedTransaction: String, type: String): TxHashResponse {
+        val request = SignedTransaction(signedTransaction)
+        val response = Fuel.post("$backendUrl/issuer/transaction/$type")
+                .jsonBody(mapper.writeValueAsString(request))
+                .responseObject<TxHashResponse>(mapper)
+        return response.third.get()
+    }
 }

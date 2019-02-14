@@ -14,7 +14,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.fail
 
-class IpfsTest: BaseTest() {
+class IpfsIntegrationTest: BaseTest() {
 
     private lateinit var testContext: TestContext
 

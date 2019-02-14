@@ -5,6 +5,7 @@ import kotliquery.HikariCP
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
+import kotlin.random.Random
 
 object DatabaseUtil {
 
@@ -52,14 +53,16 @@ object DatabaseUtil {
     }
 
     fun insertUserInDb(email: String) {
+        val id = getRandomIntForDbId()
         using(sessionOf(backendDatabase)) { session ->
-            session.run(queryOf("insert into app_user values (1, '$email', '\$2a\$10\$khTDWUCcJ1Wff1D8lskfl.HO2PaC3MWOqwIx.ErMpuk/3K5.KM2Oa', 'first', 'last', $croatiaId, '+385', $adminRoleId, now(), 'EMAIL', true, null)").asExecute)
+            session.run(queryOf("insert into app_user values ($id, '$email', '\$2a\$10\$khTDWUCcJ1Wff1D8lskfl.HO2PaC3MWOqwIx.ErMpuk/3K5.KM2Oa', 'first', 'last', $croatiaId, '+385', $adminRoleId, now(), 'EMAIL', true, null)").asExecute)
         }
     }
 
     fun insertOrganizationInDb(name: String, userId: Int) {
+        val id = getRandomIntForDbId()
         using(sessionOf(backendDatabase)) { session ->
-            session.run(queryOf("insert into organization values (1, '$name', $userId, now(), null, true, $userId, null, null)").asExecute)
+            session.run(queryOf("insert into organization values ($id, '$name', $userId, now(), null, true, $userId, null, null)").asExecute)
         }
     }
 
@@ -70,8 +73,9 @@ object DatabaseUtil {
     }
 
     fun insertProjectInDb(name: String, userId: Int, organizationId: Int) {
+        val id = getRandomIntForDbId()
         using(sessionOf(backendDatabase)) { session ->
-            session.run(queryOf("insert into project values (1, $organizationId, '$name', 'description', " +
+            session.run(queryOf("insert into project values ($id, $organizationId, '$name', 'description', " +
                     "'location', 'location_text', '0-1%', " +
                     "now() + interval '1 day', now()+ interval '9 day', " +
                     "1000000, 'EUR', 100, 100000, " +
@@ -110,4 +114,6 @@ object DatabaseUtil {
             session.run(queryOf("TRUNCATE $table CASCADE").asExecute)
         }
     }
+
+    private fun getRandomIntForDbId() = Random.nextInt(1, 10_000)
 }

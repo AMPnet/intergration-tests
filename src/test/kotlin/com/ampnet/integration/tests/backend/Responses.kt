@@ -46,6 +46,7 @@ data class DocumentResponse(
         val size: Int,
         val createdAt: ZonedDateTime
 )
+data class TxHashResponse(val txHash: String)
 
 enum class Currency {
     EUR, HRK
