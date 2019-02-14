@@ -28,7 +28,7 @@ services:
       - 8124:8124
 
   ganache-ampnet-contracts:
-    image: ampnet/crowdfunding-contracts:0.1
+    image: ampnet/crowdfunding-contracts:0.2
     ports:
       - 8545:8545
 

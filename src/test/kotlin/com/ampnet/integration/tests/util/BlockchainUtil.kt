@@ -12,9 +12,11 @@ import org.web3j.utils.Numeric
 
 object BlockchainUtil {
 
-    val alice = Credentials.create("0x16675095b2ebbe3402d71c018158a8cef7b8cdad650e716de17c487190133932")
-    val bob = Credentials.create("0xb93de5fb1b8a74a2a1858b1e336185331a3e40a266ca3afb9b689f12ff0e8e8b")
-    val jane = Credentials.create("0x368e184997dd02a05cba483a01f63852ee649afd02d8ae74fb9369c579a0631c")
+    val alice: Credentials = Credentials.create("0xe8c7e2bdd82569189d73cb618391973c8f52d8ba651446a00a87cc67c8219781")
+    val bob: Credentials = Credentials.create("0x215d6c308a70b5b74081ec71f7d67495b0c3c88bf0ba119b8eeb022cf2c20251")
+//    val jane = Credentials.create("0xe57787b6142f659d759fcbe2ecda7e49f105fd61b10f73d980ab1964aef71132")
+
+    val eurOwner: Credentials = Credentials.create("0xc0c85e6b373d090048676f0c82542cb3bb6793491450f478b147614262718cdd")
 
     fun getPublicKey(account: Credentials): String =
             Numeric.toHexString(account.ecKeyPair.publicKey.toByteArray())

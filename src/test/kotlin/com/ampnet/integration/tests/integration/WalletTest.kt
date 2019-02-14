@@ -8,6 +8,7 @@ import com.ampnet.integration.tests.backend.WalletCreateRequest
 import com.ampnet.integration.tests.backend.WalletResponse
 import org.web3j.crypto.Credentials
 import kotlin.test.Test
+import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.fail
@@ -15,6 +16,7 @@ import kotlin.test.fail
 class WalletTest: BaseTest() {
 
     private val alice = TestUser("alice@email.com", BlockchainUtil.alice)
+    private val bob = TestUser("bob@email.com", BlockchainUtil.bob)
 
     @Test
     fun createProject() {
@@ -41,6 +43,33 @@ class WalletTest: BaseTest() {
         verify("User Alice can get balance for project wallet") {
             val projectWalletWithBalance = BackendService.getProjectWallet(alice.token, alice.projectId)
             assertNotNull(projectWalletWithBalance)
+        }
+    }
+
+    @Test
+    fun investInProject() {
+        suppose("Alice project exists") {
+            createProject()
+        }
+        suppose("Bob has a wallet") {
+            createUserWithWallet(bob)
+        }
+        suppose("Bob has some greenars on wallet") {
+            val transaction = BackendService.generateMintTransaction(BlockchainUtil.eurOwner.address, bob.email, 10000)
+            val signedTransaction = BlockchainUtil.signTransaction(transaction.transactionData, BlockchainUtil.eurOwner)
+            val txHash = BackendService.postAuthorityTransaction(signedTransaction, "mint")
+            assertNotNull(txHash)
+        }
+
+        verify("Bob can invest in Alice project") {
+            val transactionToInvest = BackendService.getProjectInvestTransaction(bob.token, alice.projectId, 1000)
+            val signedTransaction = BlockchainUtil.signTransaction(transactionToInvest.transactionData, bob.credentials)
+            val txHash = BackendService.investInProject(signedTransaction)
+            assertNotNull(txHash)
+        }
+        verify("Project did receive funds") {
+            val projectWalletWithBalance = BackendService.getProjectWallet(alice.token, alice.projectId)
+            assertEquals(1000, projectWalletWithBalance.balance)
         }
     }
 
