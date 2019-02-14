@@ -173,7 +173,7 @@ object BackendService {
 
     fun postAuthorityTransaction(signedTransaction: String, type: String): TxHashResponse {
         val request = SignedTransaction(signedTransaction)
-        val response = Fuel.post("$backendUrl/issuer/transaction?type=$type")
+        val response = Fuel.post("$backendUrl/issuer/transaction/$type")
                 .jsonBody(mapper.writeValueAsString(request))
                 .responseObject<TxHashResponse>(mapper)
         return response.third.get()
