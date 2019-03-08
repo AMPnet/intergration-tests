@@ -12,10 +12,10 @@ import com.github.kittinunf.fuel.core.extensions.authentication
 import com.github.kittinunf.fuel.core.extensions.jsonBody
 import com.github.kittinunf.fuel.jackson.responseObject
 import java.io.File
+import kotlin.test.fail
 
 object BackendService {
 
-    // TODO: maybe extract to env value
     private const val backendUrl = "http://localhost:8123"
 
     private val mapper: ObjectMapper by lazy {
@@ -58,20 +58,13 @@ object BackendService {
         return response.third.get()
     }
 
-    fun getWalletToken(token: String): WalletTokenResponse {
-        val response = Fuel.get("$backendUrl/wallet/token")
-                .authentication()
-                .bearer(token)
-                .responseObject<WalletTokenResponse>(mapper)
-        return response.third.get()
-    }
-
     fun createUserWallet(token: String, request: WalletCreateRequest): WalletResponse {
         val response = Fuel.post("$backendUrl/wallet")
                 .authentication()
                 .bearer(token)
                 .jsonBody(mapper.writeValueAsString(request))
                 .responseObject<WalletResponse>(mapper)
+        if (response.second.statusCode != 200) fail("Could not create user wallet")
         return response.third.get()
     }
 
@@ -81,16 +74,17 @@ object BackendService {
                 .authentication()
                 .bearer(token)
                 .responseObject<TransactionResponse>(mapper)
+        if (response.second.statusCode != 200) fail("Could not get transaction to create organization wallet")
         return response.third.get()
     }
 
     fun createOrganizationWallet(token: String, organizationId: Int, signedTransaction: String): WalletResponse {
-        val request = SignedTransaction(signedTransaction)
-        val response = Fuel.post("$backendUrl/wallet/organization/$organizationId/transaction")
+        val params = signedTransactionToParams(signedTransaction)
+        val response = Fuel.post("$backendUrl/wallet/organization/$organizationId/transaction", params)
                 .authentication()
                 .bearer(token)
-                .jsonBody(mapper.writeValueAsString(request))
                 .responseObject<WalletResponse>(mapper)
+        if (response.second.statusCode != 200) fail("Could not create organization wallet")
         return response.third.get()
     }
 
@@ -99,6 +93,7 @@ object BackendService {
                 .authentication()
                 .bearer(token)
                 .responseObject<WalletResponse>(mapper)
+        if (response.second.statusCode != 200) fail("Could not get organization wallet")
         return response.third.get()
     }
 
@@ -107,6 +102,7 @@ object BackendService {
                 .authentication()
                 .bearer(token)
                 .responseObject<OrganizationWithDocumentResponse>(mapper)
+        if (response.second.statusCode != 200) fail("Could not approve organization")
         return response.third.get()
     }
 
@@ -116,6 +112,7 @@ object BackendService {
                 .authentication()
                 .bearer(token)
                 .responseObject<DocumentResponse>(mapper)
+        if (response.second.statusCode != 200) fail("Could not add document to organization")
         return response.third.get()
     }
 
@@ -125,16 +122,17 @@ object BackendService {
                 .authentication()
                 .bearer(token)
                 .responseObject<TransactionResponse>(mapper)
+        if (response.second.statusCode != 200) fail("Could not get transaction to create project wallet")
         return response.third.get()
     }
 
     fun createProjectWallet(token: String, projectId: Int, signedTransaction: String): WalletResponse {
-        val request = SignedTransaction(signedTransaction)
-        val response = Fuel.post("$backendUrl/wallet/project/$projectId/transaction")
+        val params = signedTransactionToParams(signedTransaction)
+        val response = Fuel.post("$backendUrl/wallet/project/$projectId/transaction", params)
                 .authentication()
                 .bearer(token)
-                .jsonBody(mapper.writeValueAsString(request))
                 .responseObject<WalletResponse>(mapper)
+        if (response.second.statusCode != 200) fail("Could not create project wallet")
         return response.third.get()
     }
 
@@ -143,6 +141,7 @@ object BackendService {
                 .authentication()
                 .bearer(token)
                 .responseObject<WalletResponse>(mapper)
+        if (response.second.statusCode != 200) fail("Could not get project wallet")
         return response.third.get()
     }
 
@@ -152,14 +151,32 @@ object BackendService {
                 .authentication()
                 .bearer(token)
                 .responseObject<TransactionResponse>(mapper)
+        if (response.second.statusCode != 200) fail("Could not get project invest transaction")
         return response.third.get()
     }
 
     fun investInProject(signedTransaction: String): TxHashResponse {
-        val request = SignedTransaction(signedTransaction)
-        val response = Fuel.post("$backendUrl/project/invest")
-                .jsonBody(mapper.writeValueAsString(request))
+        val params = signedTransactionToParams(signedTransaction)
+        val response = Fuel.post("$backendUrl/project/invest", params)
                 .responseObject<TxHashResponse>(mapper)
+        if (response.second.statusCode != 200) fail("Could not invest in project")
+        return response.third.get()
+    }
+
+    fun getConfirmInvestmentTransaction(token: String, projectId: Int): TransactionResponse {
+        val response = Fuel.get("$backendUrl/project/$projectId/invest/confirm")
+                .authentication()
+                .bearer(token)
+                .responseObject<TransactionResponse>(mapper)
+        if (response.second.statusCode != 200) fail("Could not get project confirm investment transaction")
+        return response.third.get()
+    }
+
+    fun confirmInvestment(signedTransaction: String): TxHashResponse {
+        val params = signedTransactionToParams(signedTransaction)
+        val response = Fuel.post("$backendUrl/project/invest/confirm", params)
+                .responseObject<TxHashResponse>(mapper)
+        if (response.second.statusCode != 200) fail("Could not confirm investment in project")
         return response.third.get()
     }
 
@@ -168,6 +185,7 @@ object BackendService {
         val params = listOf("from" to from, "email" to userEmail, "amount" to amount)
         val response = Fuel.get("$backendUrl/issuer/mint", params)
                 .responseObject<TransactionResponse>(mapper)
+        if (response.second.statusCode != 200) fail("Could not generate mint transaction")
         return response.third.get()
     }
 
@@ -176,6 +194,9 @@ object BackendService {
         val response = Fuel.post("$backendUrl/issuer/transaction/$type")
                 .jsonBody(mapper.writeValueAsString(request))
                 .responseObject<TxHashResponse>(mapper)
+        if (response.second.statusCode != 200) fail("Could not post mint transaction")
         return response.third.get()
     }
+
+    private fun signedTransactionToParams(signedTransaction: String) = listOf("d" to signedTransaction)
 }
