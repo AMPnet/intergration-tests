@@ -61,10 +61,16 @@ class BlockchainIntegrationTest: BaseTest() {
             assertNotNull(txHash)
         }
 
-        verify("Bob can invest in Alice project") {
+        verify("Bob can start investment in Alice project") {
             val transactionToInvest = BackendService.getProjectInvestTransaction(bob.token, alice.projectId, 1000)
             val signedTransaction = BlockchainUtil.signTransaction(transactionToInvest.transactionData, bob.credentials)
             val txHash = BackendService.investInProject(signedTransaction)
+            assertNotNull(txHash)
+        }
+        verify("Bob can confirm investment in Alice project") {
+            val transactionToConfirmInvestment = BackendService.getConfirmInvestmentTransaction(bob.token, alice.projectId)
+            val signedTransaction = BlockchainUtil.signTransaction(transactionToConfirmInvestment.transactionData, bob.credentials)
+            val txHash = BackendService.confirmInvestment(signedTransaction)
             assertNotNull(txHash)
         }
         verify("Project did receive funds") {

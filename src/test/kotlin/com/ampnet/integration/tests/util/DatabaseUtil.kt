@@ -11,7 +11,6 @@ object DatabaseUtil {
 
     private const val databaseUrl = "jdbc:postgresql://localhost:5432"
 
-    // TODO: maybe extract to env values
     private val backendDatabase: HikariDataSource by lazy {
         HikariCP.default("$databaseUrl/crowdfunding", "crowdfunding", "password")
     }
@@ -77,7 +76,7 @@ object DatabaseUtil {
         using(sessionOf(backendDatabase)) { session ->
             session.run(queryOf("insert into project values ($id, $organizationId, '$name', 'description', " +
                     "'location', 'location_text', '0-1%', " +
-                    "now() + interval '1 day', now()+ interval '9 day', " +
+                    "now(), now()+ interval '9 day', " +
                     "1000000, 'EUR', 100, 100000, " +
                     "null, null, $userId, now(), null, true)").asExecute)
         }
