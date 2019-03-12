@@ -73,11 +73,10 @@ class BlockchainIntegrationTest: BaseTest() {
             val txHash = BackendService.confirmInvestment(signedTransaction)
             assertNotNull(txHash)
         }
-        // TODO: Fix this!
-//        verify("Project did receive funds") {
-//            val projectWalletWithBalance = BackendService.getProjectWallet(alice.token, alice.projectId)
-//            assertEquals(1000, projectWalletWithBalance.balance)
-//        }
+        verify("Project did receive funds") {
+            val projectWalletWithBalance = BackendService.getProjectWallet(alice.token, alice.projectId)
+            assertEquals(1000, projectWalletWithBalance.balance)
+        }
     }
 
     private fun createUserWithWallet(user: TestUser) {
