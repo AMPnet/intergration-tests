@@ -10,7 +10,7 @@ services:
   backend-service:
     image: ampnet/crowdfunding-backend:latest
     environment:
-      - "spring.profiles.active=dev"
+      - "spring.profiles.active=integration-test"
     depends_on:
        - db
        - ipfs
