@@ -78,16 +78,6 @@ object BackendService {
         return response.third.get()
     }
 
-    fun createOrganizationWallet(token: String, organizationId: Int, signedTransaction: String): WalletResponse {
-        val params = signedTransactionToParams(signedTransaction)
-        val response = Fuel.post("$backendUrl/wallet/organization/$organizationId/transaction", params)
-                .authentication()
-                .bearer(token)
-                .responseObject<WalletResponse>(mapper)
-        if (response.second.statusCode != 200) fail("Could not create organization wallet")
-        return response.third.get()
-    }
-
     fun getOrganizationWallet(token: String, organizationId: Int): WalletResponse {
         val response = Fuel.get("$backendUrl/wallet/organization/$organizationId")
                 .authentication()
@@ -126,16 +116,6 @@ object BackendService {
         return response.third.get()
     }
 
-    fun createProjectWallet(token: String, projectId: Int, signedTransaction: String): WalletResponse {
-        val params = signedTransactionToParams(signedTransaction)
-        val response = Fuel.post("$backendUrl/wallet/project/$projectId/transaction", params)
-                .authentication()
-                .bearer(token)
-                .responseObject<WalletResponse>(mapper)
-        if (response.second.statusCode != 200) fail("Could not create project wallet")
-        return response.third.get()
-    }
-
     fun getProjectWallet(token: String, projectId: Int): WalletResponse {
         val response = Fuel.get("$backendUrl/wallet/project/$projectId")
                 .authentication()
@@ -155,14 +135,6 @@ object BackendService {
         return response.third.get()
     }
 
-    fun investInProject(signedTransaction: String): TxHashResponse {
-        val params = signedTransactionToParams(signedTransaction)
-        val response = Fuel.post("$backendUrl/project/invest", params)
-                .responseObject<TxHashResponse>(mapper)
-        if (response.second.statusCode != 200) fail("Could not invest in project")
-        return response.third.get()
-    }
-
     fun getConfirmInvestmentTransaction(token: String, projectId: Int): TransactionResponse {
         val response = Fuel.get("$backendUrl/project/$projectId/invest/confirm")
                 .authentication()
@@ -172,19 +144,19 @@ object BackendService {
         return response.third.get()
     }
 
-    fun confirmInvestment(signedTransaction: String): TxHashResponse {
-        val params = signedTransactionToParams(signedTransaction)
-        val response = Fuel.post("$backendUrl/project/invest/confirm", params)
+    fun broadcastTransaction(signedTransaction: String, txId: Int): TxHashResponse {
+        val params = listOf("tx_id" to txId, "tx_sig" to signedTransaction)
+        val response = Fuel.post("$backendUrl/tx_broadcast", params)
                 .responseObject<TxHashResponse>(mapper)
-        if (response.second.statusCode != 200) fail("Could not confirm investment in project")
+        if (response.second.statusCode != 200) fail("Could not broadcast transaction")
         return response.third.get()
     }
 
     /* Issuing Authority */
-    fun generateMintTransaction(from: String, userEmail: String, amount: Long): TransactionResponse {
+    fun generateMintTransaction(from: String, userEmail: String, amount: Long): TransactionAndLinkResponse {
         val params = listOf("from" to from, "email" to userEmail, "amount" to amount)
         val response = Fuel.get("$backendUrl/issuer/mint", params)
-                .responseObject<TransactionResponse>(mapper)
+                .responseObject<TransactionAndLinkResponse>(mapper)
         if (response.second.statusCode != 200) fail("Could not generate mint transaction")
         return response.third.get()
     }
@@ -197,6 +169,4 @@ object BackendService {
         if (response.second.statusCode != 200) fail("Could not post mint transaction")
         return response.third.get()
     }
-
-    private fun signedTransactionToParams(signedTransaction: String) = listOf("d" to signedTransaction)
 }

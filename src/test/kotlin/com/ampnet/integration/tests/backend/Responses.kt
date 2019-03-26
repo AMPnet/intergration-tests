@@ -12,14 +12,20 @@ data class WalletResponse(
         val currency: Currency,
         val createdAt: ZonedDateTime
 )
-data class WalletTokenResponse(
-        val token: String,
-        val createdAt: ZonedDateTime
-)
+
 data class TransactionResponse(
-        val transactionData: TransactionData,
-        val link: String
+        val tx: TransactionData,
+        val txId: Int,
+        val info: TransactionInfoResponse
+        // TODO: add infoSig
 )
+
+data class TransactionInfoResponse(
+        val txType: TransactionType,
+        val title: String,
+        val description: String
+)
+data class TransactionAndLinkResponse(val tx: TransactionData, val link: String)
 data class TransactionData(
         val data: String,
         val to: String,
@@ -29,6 +35,8 @@ data class TransactionData(
         val value: Long,
         val publicKey: String
 )
+data class TxHashResponse(val txHash: String)
+
 data class OrganizationWithDocumentResponse(
         val id: Int,
         val name: String,
@@ -46,11 +54,16 @@ data class DocumentResponse(
         val size: Int,
         val createdAt: ZonedDateTime
 )
-data class TxHashResponse(val txHash: String)
 
 enum class Currency {
     EUR, HRK
 }
 enum class WalletType {
     ORG, USER, PROJECT
+}
+enum class TransactionType(val description: String) {
+    CREATE_ORG("CreateOrgTx"),
+    CREATE_PROJECT("CreateProjectTx"),
+    INVEST_ALLOWANCE("InvestAllowanceTx"),
+    INVEST("InvestTx")
 }

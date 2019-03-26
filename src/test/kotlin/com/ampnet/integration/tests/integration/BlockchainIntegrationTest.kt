@@ -56,21 +56,21 @@ class BlockchainIntegrationTest: BaseTest() {
         }
         suppose("Bob has some greenars on wallet") {
             val transaction = BackendService.generateMintTransaction(BlockchainUtil.eurOwner.address, bob.email, 10000)
-            val signedTransaction = BlockchainUtil.signTransaction(transaction.transactionData, BlockchainUtil.eurOwner)
+            val signedTransaction = BlockchainUtil.signTransaction(transaction.tx, BlockchainUtil.eurOwner)
             val txHash = BackendService.postAuthorityTransaction(signedTransaction, "mint")
             assertNotNull(txHash)
         }
 
         verify("Bob can start investment in Alice project") {
             val transactionToInvest = BackendService.getProjectInvestTransaction(bob.token, alice.projectId, 1000)
-            val signedTransaction = BlockchainUtil.signTransaction(transactionToInvest.transactionData, bob.credentials)
-            val txHash = BackendService.investInProject(signedTransaction)
+            val signedTransaction = BlockchainUtil.signTransaction(transactionToInvest.tx, bob.credentials)
+            val txHash = BackendService.broadcastTransaction(signedTransaction, transactionToInvest.txId)
             assertNotNull(txHash)
         }
         verify("Bob can confirm investment in Alice project") {
             val transactionToConfirmInvestment = BackendService.getConfirmInvestmentTransaction(bob.token, alice.projectId)
-            val signedTransaction = BlockchainUtil.signTransaction(transactionToConfirmInvestment.transactionData, bob.credentials)
-            val txHash = BackendService.confirmInvestment(signedTransaction)
+            val signedTransaction = BlockchainUtil.signTransaction(transactionToConfirmInvestment.tx, bob.credentials)
+            val txHash = BackendService.broadcastTransaction(signedTransaction, transactionToConfirmInvestment.txId)
             assertNotNull(txHash)
         }
         verify("Project did receive funds") {
@@ -122,8 +122,9 @@ class BlockchainIntegrationTest: BaseTest() {
             val transactionToCreateOrganization = BackendService
                     .getTransactionToCreateOrganizationWallet(user.token, user.organizationId)
             val signedTransaction = BlockchainUtil
-                    .signTransaction(transactionToCreateOrganization.transactionData, user.credentials)
-            BackendService.createOrganizationWallet(user.token, user.organizationId, signedTransaction)
+                    .signTransaction(transactionToCreateOrganization.tx, user.credentials)
+            val txHash = BackendService.broadcastTransaction(signedTransaction, transactionToCreateOrganization.txId)
+            assertNotNull(txHash)
         }
         verify("User can get balance for organization wallet") {
             Thread.sleep(3000)
@@ -143,9 +144,9 @@ class BlockchainIntegrationTest: BaseTest() {
             val transactionToCreateProject = BackendService
                     .getTransactionToCreateProjectWallet(user.token, user.projectId)
             val signedTransactionToCreateProject = BlockchainUtil
-                    .signTransaction(transactionToCreateProject.transactionData, user.credentials)
+                    .signTransaction(transactionToCreateProject.tx, user.credentials)
             val projectWallet = BackendService
-                    .createProjectWallet(user.token, user.projectId, signedTransactionToCreateProject)
+                    .broadcastTransaction(signedTransactionToCreateProject, transactionToCreateProject.txId)
             assertNotNull(projectWallet)
         }
     }
