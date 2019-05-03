@@ -3,18 +3,16 @@ package com.ampnet.integration.tests.integration
 import com.ampnet.integration.tests.BaseTest
 import com.ampnet.integration.tests.backend.BackendService
 import com.ampnet.integration.tests.util.DatabaseUtil
-import io.ipfs.api.IPFS
-import io.ipfs.multihash.Multihash
+import com.github.kittinunf.fuel.Fuel
+import com.github.kittinunf.fuel.core.Method
 import java.io.File
-import java.util.concurrent.Executors
-import java.util.concurrent.TimeUnit
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.fail
 
-class IpfsIntegrationTest: BaseTest() {
+class CloudStorageIntegrationTest: BaseTest() {
 
     private lateinit var testContext: TestContext
 
@@ -48,28 +46,20 @@ class IpfsIntegrationTest: BaseTest() {
         verify("User can upload document for organization") {
             val documentResponse = BackendService
                     .addDocument(testContext.token, testContext.organizationId, testContext.fileLocation, "test-file.json")
-            testContext.documentHash = documentResponse.hash
+            testContext.documentLink = documentResponse.link
         }
-        verify("Document can be fetched from IPFS") {
-            val data = getDataFromIpfs(testContext.documentHash)
-            assertNotNull(data)
+        verify("Document can be fetched from Cloud storage") {
+            val downloadedData = getFileDataFromCloudStorage(testContext.documentLink)
             val fileData = File(testContext.fileLocation).readText()
-            assertEquals(fileData, String(data))
+            assertEquals(fileData, downloadedData)
         }
+        // maybe add deleting file from cloud storage
     }
 
-    private fun getDataFromIpfs(hash: String): ByteArray? {
-        val ipfs = IPFS("/ip4/127.0.0.1/tcp/5001")
-        ipfs.refs.local()
-
-        val filePointer = Multihash.fromBase58(hash)
-        val future = Executors.newCachedThreadPool().submit<ByteArray> { ipfs.cat(filePointer) }
-        return try {
-            val fileContents = future.get(3000, TimeUnit.MILLISECONDS)
-            fileContents
-        } catch (ex: Exception) {
-            null
-        }
+    private fun getFileDataFromCloudStorage(link: String): String {
+        val response = Fuel.get(link).response()
+        if (response.second.statusCode != 200) fail("Could not download the file from Cloud storage. Link: $link")
+        return String(response.third.get())
     }
 
     private class TestContext {
@@ -79,6 +69,6 @@ class IpfsIntegrationTest: BaseTest() {
         var userId = -1
         var organizationId = -1
         lateinit var token: String
-        lateinit var documentHash: String
+        lateinit var documentLink: String
     }
 }

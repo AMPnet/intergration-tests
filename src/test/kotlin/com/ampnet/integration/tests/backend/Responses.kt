@@ -48,7 +48,7 @@ data class OrganizationWithDocumentResponse(
 )
 data class DocumentResponse(
         val id: Int,
-        val hash: String,
+        val link: String,
         val name: String,
         val type: String,
         val size: Int,

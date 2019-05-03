@@ -13,7 +13,6 @@ services:
       - "spring.profiles.active=integration-test"
     depends_on:
        - db
-       - ipfs
     ports:
        - 8123:8123
 
@@ -31,10 +30,3 @@ services:
     image: ampnet/crowdfunding-contracts:latest
     ports:
       - 8545:8545
-
-  ipfs:
-    image: ipfs/go-ipfs:latest
-    ports:
-      - 4001:4001
-      - 8080:8080
-      - 5001:5001
