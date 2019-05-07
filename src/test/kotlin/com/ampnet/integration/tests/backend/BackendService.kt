@@ -106,6 +106,14 @@ object BackendService {
         return response.third.get()
     }
 
+    fun removeDocument(token: String, organizationId: Int, documentId: Int) {
+        val response = Fuel.delete("$backendUrl/organization/$organizationId/document/$documentId")
+                .authentication()
+                .bearer(token)
+                .response()
+        if (response.second.statusCode != 200) fail("Could not delete organization document")
+    }
+
     /* Project */
     fun getTransactionToCreateProjectWallet(token: String, projectId: Int): TransactionResponse {
         val response = Fuel.get("$backendUrl/wallet/project/$projectId/transaction")

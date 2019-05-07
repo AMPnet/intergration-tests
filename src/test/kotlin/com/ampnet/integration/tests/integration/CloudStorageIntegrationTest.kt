@@ -4,12 +4,10 @@ import com.ampnet.integration.tests.BaseTest
 import com.ampnet.integration.tests.backend.BackendService
 import com.ampnet.integration.tests.util.DatabaseUtil
 import com.github.kittinunf.fuel.Fuel
-import com.github.kittinunf.fuel.core.Method
 import java.io.File
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertNotNull
 import kotlin.test.fail
 
 class CloudStorageIntegrationTest: BaseTest() {
@@ -47,13 +45,17 @@ class CloudStorageIntegrationTest: BaseTest() {
             val documentResponse = BackendService
                     .addDocument(testContext.token, testContext.organizationId, testContext.fileLocation, "test-file.json")
             testContext.documentLink = documentResponse.link
+            testContext.documentId = documentResponse.id
         }
         verify("Document can be fetched from Cloud storage") {
             val downloadedData = getFileDataFromCloudStorage(testContext.documentLink)
             val fileData = File(testContext.fileLocation).readText()
             assertEquals(fileData, downloadedData)
         }
-        // maybe add deleting file from cloud storage
+        verify("User can delete document") {
+            BackendService.removeDocument(testContext.token, testContext.organizationId, testContext.documentId)
+        }
+        // deleting is too slow to be tested
     }
 
     private fun getFileDataFromCloudStorage(link: String): String {
@@ -70,5 +72,6 @@ class CloudStorageIntegrationTest: BaseTest() {
         var organizationId = -1
         lateinit var token: String
         lateinit var documentLink: String
+        var documentId = -1
     }
 }
