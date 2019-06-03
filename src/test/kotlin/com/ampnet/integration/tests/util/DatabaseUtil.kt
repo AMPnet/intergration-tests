@@ -21,7 +21,6 @@ object DatabaseUtil {
     const val defaultUserPassword = "abcdefgh"
     private const val adminRoleId = 1
     private const val orgAdminRoleId = 3
-    private const val croatiaId = 3
 
     fun clearUsers() {
         truncateTable(backendDatabase, "app_user")
@@ -54,7 +53,7 @@ object DatabaseUtil {
     fun insertUserInDb(email: String) {
         val id = getRandomIntForDbId()
         using(sessionOf(backendDatabase)) { session ->
-            session.run(queryOf("insert into app_user values ($id, '$email', '\$2a\$10\$khTDWUCcJ1Wff1D8lskfl.HO2PaC3MWOqwIx.ErMpuk/3K5.KM2Oa', 'first', 'last', $croatiaId, '+385', $adminRoleId, now(), 'EMAIL', true, null)").asExecute)
+            session.run(queryOf("insert into app_user values ($id, '$email', '\$2a\$10\$khTDWUCcJ1Wff1D8lskfl.HO2PaC3MWOqwIx.ErMpuk/3K5.KM2Oa', 'first', 'last', '+385', $adminRoleId, now(), 'EMAIL', true, null)").asExecute)
         }
     }
 
