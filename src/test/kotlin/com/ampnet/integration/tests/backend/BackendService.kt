@@ -177,4 +177,12 @@ object BackendService {
         if (response.second.statusCode != 200) fail("Could not post mint transaction")
         return response.third.get()
     }
+
+    /* Identyum */
+    fun getIdentyumToken(): IdentyumToken {
+        val response = Fuel.get("$backendUrl/identyum/token")
+                .responseObject<IdentyumToken>(mapper)
+        if (response.second.statusCode != 200) fail("Could not get Identyum token")
+        return response.third.get()
+    }
 }

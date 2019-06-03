@@ -55,6 +55,8 @@ data class DocumentResponse(
         val createdAt: ZonedDateTime
 )
 
+data class IdentyumToken(val token: String)
+
 enum class Currency {
     EUR, HRK
 }
