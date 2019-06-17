@@ -40,7 +40,6 @@ data class TxHashResponse(val txHash: String)
 data class OrganizationWithDocumentResponse(
         val id: Int,
         val name: String,
-        val createdByUser: String,
         val createdAt: ZonedDateTime,
         val approved: Boolean,
         val legalInfo: String,
