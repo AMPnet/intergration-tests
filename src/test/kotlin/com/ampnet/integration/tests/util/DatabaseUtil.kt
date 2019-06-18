@@ -23,7 +23,7 @@ object DatabaseUtil {
 
     const val defaultUserPassword = "abcdefgh"
     private const val adminRoleId = 1
-    private const val orgAdminRoleId = 3
+    private const val orgAdminRoleId = 1
 
     fun cleanUserServiceDb() {
         clearUsers()

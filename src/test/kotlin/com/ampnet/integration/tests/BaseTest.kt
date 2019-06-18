@@ -30,6 +30,10 @@ abstract class BaseTest {
                         Wait.forHttp("/actuator/health")
                                 .forStatusCode(200)
                                 .withStartupTimeout(statupTimeout))
+                .waitingFor("user-service",
+                        Wait.forHttp("/actuator/health")
+                                .forStatusCode(200)
+                                .withStartupTimeout(statupTimeout))
                 .withLocalCompose(true)
 
         init {
