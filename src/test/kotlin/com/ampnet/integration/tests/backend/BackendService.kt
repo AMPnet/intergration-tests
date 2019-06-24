@@ -1,11 +1,5 @@
 package com.ampnet.integration.tests.backend
 
-import com.fasterxml.jackson.databind.DeserializationFeature
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.databind.PropertyNamingStrategy
-import com.fasterxml.jackson.databind.SerializationFeature
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import com.github.kittinunf.fuel.Fuel
 import com.github.kittinunf.fuel.core.FileDataPart
 import com.github.kittinunf.fuel.core.extensions.authentication
@@ -18,40 +12,17 @@ object BackendService {
 
     private const val backendUrl = "http://localhost:8123"
 
-    private val mapper: ObjectMapper by lazy {
-        val mapper = ObjectMapper().registerKotlinModule()
-                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
-        mapper.registerModule(JavaTimeModule())
-        mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
-        mapper.propertyNamingStrategy = PropertyNamingStrategy.SNAKE_CASE
-        mapper
-    }
-
     fun getHealthStatus(): Health? {
         val response = Fuel.get("$backendUrl/actuator/health").responseObject<Health>()
         return response.third.component1()
     }
 
     /* User */
-    fun getJwtToken(email: String, password: String): String {
-        val response = Fuel.post("$backendUrl/token")
-                .jsonBody("""{
-                    |"login_method": "EMAIL",
-                    |"credentials": {
-                    |       "email": "$email",
-                    |       "password": "$password"
-                    |   }
-                    |}
-                """.trimMargin())
-                .responseObject<AuthTokenResponse>(mapper)
-        return response.third.get().token
-    }
-
     fun getUserWallet(token: String): WalletResponse? {
         val response = Fuel.get("$backendUrl/wallet")
                 .authentication()
                 .bearer(token)
-                .responseObject<WalletResponse>(mapper)
+                .responseObject<WalletResponse>(JsonMapper.mapper)
         if (response.second.statusCode == 404) {
             return null
         }
@@ -62,8 +33,8 @@ object BackendService {
         val response = Fuel.post("$backendUrl/wallet")
                 .authentication()
                 .bearer(token)
-                .jsonBody(mapper.writeValueAsString(request))
-                .responseObject<WalletResponse>(mapper)
+                .jsonBody(JsonMapper.mapper.writeValueAsString(request))
+                .responseObject<WalletResponse>(JsonMapper.mapper)
         if (response.second.statusCode != 200) fail("Could not create user wallet")
         return response.third.get()
     }
@@ -73,7 +44,7 @@ object BackendService {
         val response = Fuel.get("$backendUrl/wallet/organization/$organizationId/transaction")
                 .authentication()
                 .bearer(token)
-                .responseObject<TransactionResponse>(mapper)
+                .responseObject<TransactionResponse>(JsonMapper.mapper)
         if (response.second.statusCode != 200) fail("Could not get transaction to create organization wallet")
         return response.third.get()
     }
@@ -82,7 +53,7 @@ object BackendService {
         val response = Fuel.get("$backendUrl/wallet/organization/$organizationId")
                 .authentication()
                 .bearer(token)
-                .responseObject<WalletResponse>(mapper)
+                .responseObject<WalletResponse>(JsonMapper.mapper)
         if (response.second.statusCode != 200) fail("Could not get organization wallet")
         return response.third.get()
     }
@@ -91,7 +62,7 @@ object BackendService {
         val response = Fuel.post("$backendUrl/organization/$organizationId/approve")
                 .authentication()
                 .bearer(token)
-                .responseObject<OrganizationWithDocumentResponse>(mapper)
+                .responseObject<OrganizationWithDocumentResponse>(JsonMapper.mapper)
         if (response.second.statusCode != 200) fail("Could not approve organization")
         return response.third.get()
     }
@@ -101,7 +72,7 @@ object BackendService {
                 .add(FileDataPart(File(fileLocation), name = "file", filename=fileName))
                 .authentication()
                 .bearer(token)
-                .responseObject<DocumentResponse>(mapper)
+                .responseObject<DocumentResponse>(JsonMapper.mapper)
         if (response.second.statusCode != 200) fail("Could not add document to organization")
         return response.third.get()
     }
@@ -119,7 +90,7 @@ object BackendService {
         val response = Fuel.get("$backendUrl/wallet/project/$projectId/transaction")
                 .authentication()
                 .bearer(token)
-                .responseObject<TransactionResponse>(mapper)
+                .responseObject<TransactionResponse>(JsonMapper.mapper)
         if (response.second.statusCode != 200) fail("Could not get transaction to create project wallet")
         return response.third.get()
     }
@@ -128,7 +99,7 @@ object BackendService {
         val response = Fuel.get("$backendUrl/wallet/project/$projectId")
                 .authentication()
                 .bearer(token)
-                .responseObject<WalletResponse>(mapper)
+                .responseObject<WalletResponse>(JsonMapper.mapper)
         if (response.second.statusCode != 200) fail("Could not get project wallet")
         return response.third.get()
     }
@@ -138,7 +109,7 @@ object BackendService {
         val response = Fuel.get("$backendUrl/project/$projectId/invest", params)
                 .authentication()
                 .bearer(token)
-                .responseObject<TransactionResponse>(mapper)
+                .responseObject<TransactionResponse>(JsonMapper.mapper)
         if (response.second.statusCode != 200) fail("Could not get project invest transaction")
         return response.third.get()
     }
@@ -147,7 +118,7 @@ object BackendService {
         val response = Fuel.get("$backendUrl/project/$projectId/invest/confirm")
                 .authentication()
                 .bearer(token)
-                .responseObject<TransactionResponse>(mapper)
+                .responseObject<TransactionResponse>(JsonMapper.mapper)
         if (response.second.statusCode != 200) fail("Could not get project confirm investment transaction")
         return response.third.get()
     }
@@ -155,16 +126,16 @@ object BackendService {
     fun broadcastTransaction(signedTransaction: String, txId: Int): TxHashResponse {
         val params = listOf("tx_id" to txId, "tx_sig" to signedTransaction)
         val response = Fuel.post("$backendUrl/tx_broadcast", params)
-                .responseObject<TxHashResponse>(mapper)
+                .responseObject<TxHashResponse>(JsonMapper.mapper)
         if (response.second.statusCode != 200) fail("Could not broadcast transaction")
         return response.third.get()
     }
 
     /* Issuing Authority */
-    fun generateMintTransaction(from: String, userEmail: String, amount: Long): TransactionAndLinkResponse {
-        val params = listOf("from" to from, "email" to userEmail, "amount" to amount)
+    fun generateMintTransaction(from: String, userUuid: String, amount: Long): TransactionAndLinkResponse {
+        val params = listOf("from" to from, "uuid" to userUuid, "amount" to amount)
         val response = Fuel.get("$backendUrl/issuer/mint", params)
-                .responseObject<TransactionAndLinkResponse>(mapper)
+                .responseObject<TransactionAndLinkResponse>(JsonMapper.mapper)
         if (response.second.statusCode != 200) fail("Could not generate mint transaction")
         return response.third.get()
     }
@@ -172,17 +143,9 @@ object BackendService {
     fun postAuthorityTransaction(signedTransaction: String, type: String): TxHashResponse {
         val request = SignedTransaction(signedTransaction)
         val response = Fuel.post("$backendUrl/issuer/transaction/$type")
-                .jsonBody(mapper.writeValueAsString(request))
-                .responseObject<TxHashResponse>(mapper)
+                .jsonBody(JsonMapper.mapper.writeValueAsString(request))
+                .responseObject<TxHashResponse>(JsonMapper.mapper)
         if (response.second.statusCode != 200) fail("Could not post mint transaction")
-        return response.third.get()
-    }
-
-    /* Identyum */
-    fun getIdentyumToken(): IdentyumToken {
-        val response = Fuel.get("$backendUrl/identyum/token")
-                .responseObject<IdentyumToken>(mapper)
-        if (response.second.statusCode != 200) fail("Could not get Identyum token")
         return response.third.get()
     }
 }

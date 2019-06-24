@@ -7,6 +7,15 @@ services:
     ports:
       - 5432:5432
 
+  user-service:
+    image: ampnet/crowdfunding-user-service:latest
+    environment:
+      - "spring.profiles.active=integration-test"
+    depends_on:
+      - db
+    ports:
+      - 8125:8125
+
   backend-service:
     image: ampnet/crowdfunding-backend:latest
     environment:

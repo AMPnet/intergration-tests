@@ -2,11 +2,13 @@ package com.ampnet.integration.tests.integration
 
 import com.ampnet.integration.tests.BaseTest
 import com.ampnet.integration.tests.backend.BackendService
+import com.ampnet.integration.tests.backend.UserService
 import com.ampnet.integration.tests.util.BlockchainUtil
 import com.ampnet.integration.tests.util.DatabaseUtil
 import com.ampnet.integration.tests.backend.WalletCreateRequest
 import com.ampnet.integration.tests.backend.WalletResponse
 import org.web3j.crypto.Credentials
+import java.util.UUID
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
@@ -21,6 +23,7 @@ class BlockchainIntegrationTest: BaseTest() {
     @Test
     fun createProject() {
         suppose("Databases are clean") {
+            DatabaseUtil.cleanUserServiceDb()
             DatabaseUtil.cleanBlockchainDb()
             DatabaseUtil.cleanBackendDb()
         }
@@ -55,7 +58,7 @@ class BlockchainIntegrationTest: BaseTest() {
             createUserWithWallet(bob)
         }
         suppose("Bob has some greenars on wallet") {
-            val transaction = BackendService.generateMintTransaction(BlockchainUtil.eurOwner.address, bob.email, 10000)
+            val transaction = BackendService.generateMintTransaction(BlockchainUtil.eurOwner.address, bob.uuid, 10000)
             val signedTransaction = BlockchainUtil.signTransaction(transaction.tx, BlockchainUtil.eurOwner)
             val txHash = BackendService.postAuthorityTransaction(signedTransaction, "mint")
             assertNotNull(txHash)
@@ -81,13 +84,11 @@ class BlockchainIntegrationTest: BaseTest() {
 
     private fun createUserWithWallet(user: TestUser) {
         suppose("User exists in database") {
-            DatabaseUtil.insertUserInDb(user.email)
-            user.userId = DatabaseUtil.getUserIdForEmail(user.email)
-                    ?: fail("Missing user with email: ${user.email}")
+            DatabaseUtil.insertUserInDb(user.email, user.uuid)
         }
 
         verify("User can get token") {
-            user.token = BackendService.getJwtToken(user.email, DatabaseUtil.defaultUserPassword)
+            user.token = UserService.getJwtToken(user.email, DatabaseUtil.defaultUserPassword)
         }
         verify("User does not have a wallet") {
             val emptyWallet = BackendService.getUserWallet(user.token)
@@ -109,13 +110,13 @@ class BlockchainIntegrationTest: BaseTest() {
             assertNotNull(walletWithBalance)
         }
         suppose("Organization exists") {
-            DatabaseUtil.insertOrganizationInDb(organizationName, user.userId)
+            DatabaseUtil.insertOrganizationInDb(organizationName, user.uuid)
             user.organizationId = DatabaseUtil.getOrganizationIdForName(organizationName)
                     ?: fail("Missing organization with name: $organizationName")
         }
 
         suppose("User is an admin of the organization") {
-            DatabaseUtil.insertOrganizationMembershipInDb(user.userId, user.organizationId)
+            DatabaseUtil.insertOrganizationMembershipInDb(user.uuid, user.organizationId)
         }
 
         verify("User can create organization wallet") {
@@ -135,7 +136,7 @@ class BlockchainIntegrationTest: BaseTest() {
 
     private fun createProjectWithWallet(user: TestUser, projectName: String) {
         suppose("Project exists") {
-            DatabaseUtil.insertProjectInDb(projectName, user.userId, user.organizationId)
+            DatabaseUtil.insertProjectInDb(projectName, user.uuid, user.organizationId)
             user.projectId = DatabaseUtil.getProjectIdForName(projectName)
                     ?: fail("Missing project with name: $projectName")
         }
@@ -158,7 +159,7 @@ class BlockchainIntegrationTest: BaseTest() {
 
     private class TestUser(val email: String, val credentials: Credentials) {
         lateinit var token: String
-        var userId = -1
+        val uuid = UUID.randomUUID().toString()
         var organizationId = -1
         var projectId = -1
     }

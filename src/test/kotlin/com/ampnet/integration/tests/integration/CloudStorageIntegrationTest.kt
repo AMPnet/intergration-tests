@@ -2,9 +2,11 @@ package com.ampnet.integration.tests.integration
 
 import com.ampnet.integration.tests.BaseTest
 import com.ampnet.integration.tests.backend.BackendService
+import com.ampnet.integration.tests.backend.UserService
 import com.ampnet.integration.tests.util.DatabaseUtil
 import com.github.kittinunf.fuel.Fuel
 import java.io.File
+import java.util.UUID
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -12,6 +14,7 @@ import kotlin.test.fail
 
 class CloudStorageIntegrationTest: BaseTest() {
 
+    private val user = TestUser()
     private lateinit var testContext: TestContext
 
     @BeforeTest
@@ -25,20 +28,18 @@ class CloudStorageIntegrationTest: BaseTest() {
             DatabaseUtil.cleanBackendDb()
         }
         suppose("User exists in database") {
-            DatabaseUtil.insertUserInDb(testContext.email)
-            testContext.userId = DatabaseUtil.getUserIdForEmail(testContext.email)
-                    ?: fail("Missing user with email: ${testContext.email}")
+            DatabaseUtil.insertUserInDb(user.email, user.uuid)
         }
         suppose("Organization exists") {
-            DatabaseUtil.insertOrganizationInDb(testContext.organizationName, testContext.userId)
+            DatabaseUtil.insertOrganizationInDb(testContext.organizationName, user.uuid)
             testContext.organizationId = DatabaseUtil.getOrganizationIdForName(testContext.organizationName)
                     ?: fail("Missing organization with name: ${testContext.organizationName}")
         }
         suppose("User is an admin of the organization") {
-            DatabaseUtil.insertOrganizationMembershipInDb(testContext.userId, testContext.organizationId)
+            DatabaseUtil.insertOrganizationMembershipInDb(user.uuid, testContext.organizationId)
         }
         suppose("User has token") {
-            testContext.token = BackendService.getJwtToken(testContext.email, DatabaseUtil.defaultUserPassword)
+            testContext.token = UserService.getJwtToken(user.email, DatabaseUtil.defaultUserPassword)
         }
 
         verify("User can upload document for organization") {
@@ -65,13 +66,16 @@ class CloudStorageIntegrationTest: BaseTest() {
     }
 
     private class TestContext {
-        val email = "test@email.com"
         val organizationName = "Das Organization"
         val fileLocation = "src/test/resources/file.json"
-        var userId = -1
         var organizationId = -1
         lateinit var token: String
         lateinit var documentLink: String
         var documentId = -1
+    }
+
+    private class TestUser {
+        val email = "test@email.com"
+        val uuid = UUID.randomUUID().toString()
     }
 }
