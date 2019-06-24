@@ -17,7 +17,7 @@ services:
       - 8125:8125
 
   backend-service:
-    image: ampnet/crowdfunding-backend:0.5.0
+    image: ampnet/crowdfunding-backend:latest
     environment:
       - "spring.profiles.active=integration-test"
     depends_on:
