@@ -80,19 +80,8 @@ object DatabaseUtil {
                     "'location', 'location_text', '0-1%', " +
                     "now(), now()+ interval '9 day', " +
                     "1000000, 'EUR', 100, 100000, " +
-                    "null, null, '$userUuid', now(), null, true)").asExecute)
+                    "null, null, null, '$userUuid', now(), null, true)").asExecute)
         }
-    }
-
-    fun getUserIdForEmail(email: String): Int? {
-        val query = queryOf("select id from app_user where email='$email'")
-                .map { row -> row.int("id") }
-                .asSingle
-        var id: Int? = null
-        using(sessionOf(backendDatabase)) { session ->
-            id = session.run(query)
-        }
-        return id
     }
 
     fun getOrganizationIdForName(name: String): Int? = getItemIdForName(name, "organization")
