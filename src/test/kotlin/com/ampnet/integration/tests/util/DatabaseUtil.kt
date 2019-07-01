@@ -5,6 +5,7 @@ import kotliquery.HikariCP
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
+import java.util.UUID
 import kotlin.random.Random
 
 object DatabaseUtil {
@@ -40,7 +41,7 @@ object DatabaseUtil {
         truncateTable(blockchainDatabase, "wallet")
     }
 
-    fun insertUserInDb(email: String, userUuid: String) {
+    fun insertUserInDb(email: String, userUuid: UUID) {
         val id = getRandomIntForDbId()
         using(sessionOf(userServiceDatabase)) { session ->
             session.run(queryOf("insert into user_info values (" +
@@ -54,7 +55,7 @@ object DatabaseUtil {
         }
     }
 
-    fun insertOrganizationInDb(name: String, userUuid: String) {
+    fun insertOrganizationInDb(name: String, userUuid: UUID) {
         val id = getRandomIntForDbId()
         using(sessionOf(backendDatabase)) { session ->
             session.run(queryOf("insert into organization values (" +
@@ -62,7 +63,7 @@ object DatabaseUtil {
         }
     }
 
-    fun insertOrganizationMembershipInDb(userUuid: String, organizationId: Int) {
+    fun insertOrganizationMembershipInDb(userUuid: UUID, organizationId: Int) {
         val id = getRandomIntForDbId()
         using(sessionOf(backendDatabase)) { session ->
             session.run(queryOf("insert into organization_membership values (" +
@@ -70,7 +71,7 @@ object DatabaseUtil {
         }
     }
 
-    fun insertProjectInDb(name: String, userUuid: String, organizationId: Int) {
+    fun insertProjectInDb(name: String, userUuid: UUID, organizationId: Int) {
         val id = getRandomIntForDbId()
         using(sessionOf(backendDatabase)) { session ->
             session.run(queryOf("insert into project values (" +

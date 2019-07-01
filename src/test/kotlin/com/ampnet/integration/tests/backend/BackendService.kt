@@ -6,6 +6,7 @@ import com.github.kittinunf.fuel.core.extensions.authentication
 import com.github.kittinunf.fuel.core.extensions.jsonBody
 import com.github.kittinunf.fuel.jackson.responseObject
 import java.io.File
+import java.util.UUID
 import kotlin.test.fail
 
 object BackendService {
@@ -132,7 +133,7 @@ object BackendService {
     }
 
     /* Issuing Authority */
-    fun generateMintTransaction(from: String, userUuid: String, amount: Long): TransactionAndLinkResponse {
+    fun generateMintTransaction(from: String, userUuid: UUID, amount: Long): TransactionAndLinkResponse {
         val params = listOf("from" to from, "uuid" to userUuid, "amount" to amount)
         val response = Fuel.get("$backendUrl/issuer/mint", params)
                 .responseObject<TransactionAndLinkResponse>(JsonMapper.mapper)

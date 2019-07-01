@@ -159,7 +159,7 @@ class BlockchainIntegrationTest: BaseTest() {
 
     private class TestUser(val email: String, val credentials: Credentials) {
         lateinit var token: String
-        val uuid = UUID.randomUUID().toString()
+        val uuid: UUID = UUID.randomUUID()
         var organizationId = -1
         var projectId = -1
     }

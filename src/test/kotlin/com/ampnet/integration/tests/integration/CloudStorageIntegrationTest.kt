@@ -76,6 +76,6 @@ class CloudStorageIntegrationTest: BaseTest() {
 
     private class TestUser {
         val email = "test@email.com"
-        val uuid = UUID.randomUUID().toString()
+        val uuid: UUID = UUID.randomUUID()
     }
 }
