@@ -1,6 +1,7 @@
 package com.ampnet.integration.tests.backend
 
 import java.time.ZonedDateTime
+import java.util.UUID
 
 data class Health(val status: String)
 data class AuthTokenResponse(val token: String)
@@ -52,6 +53,15 @@ data class DocumentResponse(
         val type: String,
         val size: Int,
         val createdAt: ZonedDateTime
+)
+
+data class OrganizationMembershipsResponse(val members: List<OrganizationMembershipResponse>)
+data class OrganizationMembershipResponse(
+        val uuid: UUID,
+        val firstName: String,
+        val lastName: String,
+        val role: String,
+        val memberSince: ZonedDateTime
 )
 
 data class IdentyumToken(val token: String)

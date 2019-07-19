@@ -86,6 +86,15 @@ object BackendService {
         if (response.second.statusCode != 200) fail("Could not delete organization document")
     }
 
+    fun getOrganizationMemberships(token: String, organizationId: Int): OrganizationMembershipsResponse {
+        val response = Fuel.get("$backendUrl/organization/$organizationId/members")
+                .authentication()
+                .bearer(token)
+                .responseObject<OrganizationMembershipsResponse>(JsonMapper.mapper)
+        if (response.second.statusCode != 200) fail("Could not create user wallet")
+        return response.third.get()
+    }
+
     /* Project */
     fun getTransactionToCreateProjectWallet(token: String, projectId: Int): TransactionResponse {
         val response = Fuel.get("$backendUrl/wallet/project/$projectId/transaction")
