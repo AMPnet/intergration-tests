@@ -74,7 +74,11 @@ object BackendService {
                 .authentication()
                 .bearer(token)
                 .responseObject<DocumentResponse>(JsonMapper.mapper)
-        if (response.second.statusCode != 200) fail("Could not add document to organization")
+        if (response.second.statusCode != 200) {
+            println("--------------------")
+            println("${response.second.statusCode}: ${response.second.responseMessage}")
+            fail("Could not add document to organization")
+        }
         return response.third.get()
     }
 
