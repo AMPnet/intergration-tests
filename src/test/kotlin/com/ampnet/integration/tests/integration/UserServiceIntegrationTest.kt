@@ -5,6 +5,7 @@ import com.ampnet.integration.tests.backend.BackendService
 import com.ampnet.integration.tests.backend.UserService
 import com.ampnet.integration.tests.util.DatabaseUtil
 import java.util.UUID
+import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.fail
@@ -13,10 +14,19 @@ class UserServiceIntegrationTest : BaseTest() {
 
     private val testContext = TestContext()
 
+    @BeforeTest
+    fun init() {
+        DatabaseUtil.cleanUserServiceDb()
+        DatabaseUtil.cleanBackendDb()
+    }
+
     @Test
     fun mustReturnUserDataToCrowdfudningBackend() {
         suppose("The user exists") {
             DatabaseUtil.insertUserInDb(testContext.email, testContext.uuid)
+        }
+        suppose("The member exists") {
+            DatabaseUtil.insertUserInDb("member@test.com", testContext.member)
         }
         suppose("Organization exists") {
             DatabaseUtil.insertOrganizationInDb(testContext.organizationName, testContext.uuid)
@@ -25,6 +35,9 @@ class UserServiceIntegrationTest : BaseTest() {
         }
         suppose("User is a member of the organization") {
             DatabaseUtil.insertOrganizationMembershipInDb(testContext.uuid, testContext.organizationId)
+        }
+        suppose("There is additional member in the organization") {
+            DatabaseUtil.insertOrganizationMembershipInDb(testContext.member, testContext.organizationId)
         }
 
         verify("User can get token") {
@@ -36,7 +49,7 @@ class UserServiceIntegrationTest : BaseTest() {
             val member = members.members[0]
             assertEquals("first", member.firstName)
             assertEquals("last", member.lastName)
-            assertEquals(testContext.uuid, member.uuid)
+            assertEquals(testContext.member, member.uuid)
             assertEquals("ORG_ADMIN", member.role)
         }
     }
@@ -47,5 +60,6 @@ class UserServiceIntegrationTest : BaseTest() {
         val uuid: UUID = UUID.randomUUID()
         val organizationName = "Organization"
         var organizationId = -1
+        val member: UUID = UUID.randomUUID()
     }
 }
