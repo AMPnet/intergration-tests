@@ -4,7 +4,13 @@ import java.time.ZonedDateTime
 import java.util.UUID
 
 data class Health(val status: String)
-data class AuthTokenResponse(val token: String)
+data class AccessRefreshTokenResponse(
+        val accessToken: String,
+        val expiresIn: Long,
+        val refreshToken: String,
+        val refreshTokenExpiresIn: Long
+)
+
 data class WalletResponse(
         val id: Int,
         val hash: String,

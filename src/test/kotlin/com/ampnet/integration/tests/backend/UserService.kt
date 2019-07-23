@@ -19,8 +19,8 @@ object UserService {
                     |   }
                     |}
                 """.trimMargin())
-                .responseObject<AuthTokenResponse>(JsonMapper.mapper)
-        return response.third.get().token
+                .responseObject<AccessRefreshTokenResponse>(JsonMapper.mapper)
+        return response.third.get().accessToken
     }
 
     /* Identyum */
