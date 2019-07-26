@@ -75,7 +75,7 @@ object BackendService {
             fileName: String,
             retry: Int = 3
     ): DocumentResponse {
-        val response = Fuel.upload("$backendUrl/organization/$organizationId")
+        val response = Fuel.upload("$backendUrl/organization/$organizationId/document")
                 .add(FileDataPart(File(fileLocation), name = "file", filename=fileName))
                 .authentication()
                 .bearer(token)
@@ -85,6 +85,7 @@ object BackendService {
                 fail("Could not add document to organization. \n" +
                         "${response.second.statusCode}: ${response.second.responseMessage}")
             } else {
+                Thread.sleep(1_000)
                 addDocument(token, organizationId, fileLocation, fileName, retry - 1)
             }
         }
