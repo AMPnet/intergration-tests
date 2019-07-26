@@ -68,16 +68,25 @@ object BackendService {
         return response.third.get()
     }
 
-    fun addDocument(token: String, organizationId: Int, fileLocation: String, fileName: String): DocumentResponse {
-        val response = Fuel.upload("$backendUrl/organization/$organizationId/document")
+    fun addDocument(
+            token: String,
+            organizationId: Int,
+            fileLocation: String,
+            fileName: String,
+            retry: Int = 3
+    ): DocumentResponse {
+        val response = Fuel.upload("$backendUrl/organization/$organizationId")
                 .add(FileDataPart(File(fileLocation), name = "file", filename=fileName))
                 .authentication()
                 .bearer(token)
                 .responseObject<DocumentResponse>(JsonMapper.mapper)
         if (response.second.statusCode != 200) {
-            println("--------------------")
-            println("${response.second.statusCode}: ${response.second.responseMessage}")
-            fail("Could not add document to organization")
+            if (retry == 0) {
+                fail("Could not add document to organization. \n" +
+                        "${response.second.statusCode}: ${response.second.responseMessage}")
+            } else {
+                addDocument(token, organizationId, fileLocation, fileName, retry - 1)
+            }
         }
         return response.third.get()
     }
