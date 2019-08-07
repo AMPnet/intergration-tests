@@ -120,7 +120,7 @@ object BackendService {
     }
 
     fun getProjectWallet(token: String, projectId: Int): WalletResponse {
-        val response = Fuel.get("$backendUrl/wallet/project/$projectId")
+        val response = Fuel.get("$backendUrl/public/wallet/project/$projectId")
                 .authentication()
                 .bearer(token)
                 .responseObject<WalletResponse>(JsonMapper.mapper)
