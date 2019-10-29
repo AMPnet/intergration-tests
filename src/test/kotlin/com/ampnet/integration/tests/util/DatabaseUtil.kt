@@ -50,7 +50,7 @@ object DatabaseUtil {
                     "'first', 'last', 'HRV', true, 'city', 'county', 'street', " +
                     "now(), true, false)").asExecute)
 
-            session.run(queryOf("insert into app_user values ('$userUuid', 'First', 'Last, '$email', " +
+            session.run(queryOf("insert into app_user values ('$userUuid', 'First', 'Last', '$email', " +
                     "'\$2a\$10\$cHyZss0hacXYrqxmVgsZ2.43ZbnW/Fey2wh1zOUtjfeOZ20loEFyq', " +
                     "$adminRoleId, now(), 'EMAIL', true, $id)").asExecute)
         }
