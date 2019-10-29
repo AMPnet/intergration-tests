@@ -48,9 +48,9 @@ object DatabaseUtil {
                     "$id, 'web_session_uuid', 'verified_email@mail.com', '+385', 'HRV', '1978-03-02', " +
                     "'ae1ee02d-8a2d-4c50-a6ca-8f0454e19f6d', 'PERSONAL_ID_CARD', '48077962579', " +
                     "'first', 'last', 'HRV', true, 'city', 'county', 'street', " +
-                    "now(), true)").asExecute)
+                    "now(), true, false)").asExecute)
 
-            session.run(queryOf("insert into app_user values ('$userUuid', '$email', " +
+            session.run(queryOf("insert into app_user values ('$userUuid', 'First', 'Last, '$email', " +
                     "'\$2a\$10\$cHyZss0hacXYrqxmVgsZ2.43ZbnW/Fey2wh1zOUtjfeOZ20loEFyq', " +
                     "$adminRoleId, now(), 'EMAIL', true, $id)").asExecute)
         }
